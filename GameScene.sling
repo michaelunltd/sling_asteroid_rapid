@@ -1,0 +1,85 @@
+class is SpriteSceneWithEntities imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var tbe as TextButtonEntity
+var bgEntity as SpriteEntity
+var obstacleEntity as ObstacleEntity
+var asteroidEntity as AsteroidEntity
+var milliseconds = 0
+var collidableEntities as vector<SpriteEntity>
+
+func initialize override
+{
+	base.initialize()
+	bgEntity = new BackgroundEntity()
+	addEntity(bgEntity)
+	height = getReferenceHeight()
+	width = getReferenceWidth()
+	tbe = TextButtonEntity.forText("Quit")
+	tbe.setBackgroundColor(Color.forRGBA(128,128,128,128))
+	addEntity(tbe)
+	tbe.move(0, 0)
+	tbe.setClickHandler(func {
+		backToMenuScene()
+	})
+	asteroidEntity = new AsteroidEntity()
+	addEntity(asteroidEntity)
+	obstacleEntity = new ObstacleEntity()
+	addEntity(obstacleEntity)
+	collidableEntities = new vector<SpriteEntity>
+	collidableEntities += asteroidEntity
+	collidableEntities += obstacleEntity
+}
+
+func onPointerEvent(event as PointerEvent) override
+{
+	base.onPointerEvent(event)
+}
+
+func cleanup override
+{
+	removeAllSprites()
+	removeEntity(tbe)
+	removeEntity(obstacleEntity)
+	removeEntity(asteroidEntity)
+	removeEntity(obstacleEntity)
+	Vector.clear(collidableEntities)
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	milliseconds = milliseconds + 1
+	if (milliseconds % 60 == 0) {
+		var obs = new ObstacleEntity()
+		addEntity(obs)
+		collidableEntities += obs
+	}
+}
+
+func backToMenuScene
+{
+	popScene()
+}
+
+func getPlayerEntity as AsteroidEntity
+{
+	return(asteroidEntity)
+}
+
+func removeObstacleEntity(n as SpriteEntity)
+{
+	removeEntity(n)
+	Vector.removeValue(collidableEntities, n)
+}
+
+func removeSpriteFromScene(n as SpriteEntity)
+{
+	removeSprite(n)
+}
+
+func gameOver
+{
+	pushScene(new GameOverScene())
+}

@@ -1,0 +1,116 @@
+class is SpriteEntity is PointerListener is KeyListener imports cave imports cape imports motion:
+
+var gameScene as GameScene
+var playerSprite as TextureSprite
+var playerTexture as Texture
+var height as double
+var width as double
+var pointerX as double
+var pointerY as double
+var movementX as double
+var movementY as double
+var mouseClick = false
+var leftPressed = false
+var rightPressed = false
+var downPressed = false
+var hasTouchObstacle = false
+
+func createSprite override as Sprite
+{
+	gameScene = getScene() as GameScene
+	height = gameScene.getReferenceHeight()
+	width = gameScene.getReferenceWidth()
+	playerTexture = gameScene.createTextureForImageResource("player")
+	playerSprite = gameScene.addTextureSpriteForSize(playerTexture, 0.1 * width, 0.1 * width)
+	movementX = (0.5 * width - (playerSprite.getWidth() * 0.5))
+	movementY = 0
+	playerSprite.move(movementX, movementY)
+	return (playerSprite)
+}
+
+func cleanup override
+{
+	gameScene.removeSprite(playerSprite)
+}
+
+func onPointerEvent(event as PointerEvent) as bool
+{
+	pointerX = event.x
+	pointerY = event.y
+	if (event.action == PointerEvent.DOWN) {
+		mouseClick = true
+	}
+	if (event.action == PointerEvent.UP) {
+		mouseClick = false
+	}
+	return false
+}
+
+func onKeyEvent(event as KeyEvent)
+{
+	movementX = playerSprite.getX()
+	movementY = playerSprite.getY()
+	if (event.getAction() == KeyEvent.ACTION_UP) {
+		leftPressed = false
+		rightPressed = false
+		downPressed = false
+	}
+	if (event.isKey(KeyEvent.KEY_LEFT)) {
+		if(event.isKeyPress(KeyEvent.KEY_LEFT)) {
+			leftPressed = true
+		}
+	}
+	else if (event.isKey(KeyEvent.KEY_RIGHT)) {
+		if(event.isKeyPress(KeyEvent.KEY_RIGHT)) {
+			rightPressed = true
+		}
+	}
+	else if (event.isKey(KeyEvent.KEY_DOWN)) {
+		if(event.isKeyPress(KeyEvent.KEY_DOWN)) {
+			downPressed = true
+		}
+	}
+}
+
+func isOutOfScreen as bool
+{
+	return playerSprite.getY() + playerSprite.getHeight() / 2 > height || playerSprite.getY() + playerSprite.getHeight() < 0
+}
+
+func tick (gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	movementX = playerSprite.getX()
+	if (isOutOfScreen()) {
+		gameScene.gameOver()
+	}
+	if (movementX > width) {
+		movementX = 0
+	}
+	else if (movementX + playerSprite.getWidth() < 0) {
+		movementX = width
+	}
+	if (leftPressed) {
+		movementX -= 0.01
+	}
+	else if (rightPressed) {
+		movementX += 0.01
+	}
+	else if (downPressed && !hasTouchObstacle) {
+		movementY += 0.01
+	}
+	if (!hasTouchObstacle) {
+		movementY += delta / 5
+	}
+	playerSprite.move(movementX, movementY)
+}
+
+func setMovementY (n as double)
+{
+	movementY = n
+}
+
+func setHasTouchObstacle (n as boolean)
+{
+	hasTouchObstacle = n
+}

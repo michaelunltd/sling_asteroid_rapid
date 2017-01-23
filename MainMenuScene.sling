@@ -1,0 +1,46 @@
+class is SpriteSceneWithEntities imports cape imports cave imports motion #mainScene:
+
+var bgSprite as TextureSprite
+var playButtonSprite as TextureSprite
+var bgTexture as Texture
+var introFgSprite as TextureSprite
+var introFgTexture as Texture
+var playButtonTexture as Texture
+var height as double
+var width as double
+var tbe as TextButtonEntity
+
+func initialize override
+{
+	base.initialize()
+	height = getReferenceHeight()
+	width = getReferenceWidth()
+	bgTexture = createTextureForImageResource("background")
+	bgSprite = addTextureSpriteForSize(bgTexture, width, height)
+	introFgTexture = createTextureForImageResource("intro_fg")
+	introFgSprite = addTextureSpriteForSize(introFgTexture, 0.5 * width, 0.25 * height)
+	introFgSprite.move(0.5 * width - (introFgSprite.getWidth() / 2), 0.35 * height - (introFgSprite.getHeight() / 2))
+	playButtonTexture = createTextureForImageResource("playbutton")
+	playButtonSprite = addTextureSpriteForSize(playButtonTexture, 0.2 * width, 0.2 * height)
+	playButtonSprite.move(0.5 * width - (playButtonSprite.getWidth() / 2), 0.7 * height - (playButtonSprite.getHeight() / 2))
+	tbe = TextButtonEntity.forText("Play")
+	tbe.setBackgroundColor(Color.forRGBA(255,255,255,0))
+	addEntity(tbe)
+	tbe.move(0.5 * width - (tbe.getWidth() / 2), 0.9 * height - (tbe.getHeight() / 2))
+	tbe.setClickHandler(func {
+		pushScene(new GameScene())
+	})
+}
+
+func onPointerEvent(event as PointerEvent) override
+{
+	base.onPointerEvent(event)
+}
+
+func cleanup override
+{
+	removeSprite(bgSprite)
+	removeSprite(playButtonSprite)
+	removeSprite(introFgSprite)
+	removeEntity(tbe)
+}

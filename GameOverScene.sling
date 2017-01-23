@@ -1,0 +1,30 @@
+class is SpriteSceneWithEntities imports cape imports cave imports motion:
+
+var gameOverTexture as Texture
+var gameOverSprite as TextureSprite
+var height as double
+var width as double
+var tbe as TextButtonEntity
+
+func initialize override
+{
+	base.initialize()
+	height = getReferenceHeight()
+	width = getReferenceWidth()
+	gameOverTexture = createTextureForImageResource("gameover")
+	gameOverSprite = addTextureSpriteForSize(gameOverTexture, 0.3 * width, 0.1 * height)
+	gameOverSprite.move(0.5 * width - (gameOverSprite.getWidth() * 0.5), 0.5 * height - (gameOverSprite.getHeight() * 0.5))
+	tbe = TextButtonEntity.forText("Go Back to Main Menu")
+	tbe.setBackgroundColor(Color.forRGBA(128,128,128,128))
+	addEntity(tbe)
+	tbe.move(0, 0)
+	tbe.setClickHandler(func {
+		pushScene(new MainMenuScene())
+	})
+}
+
+func cleanup override
+{
+	removeSprite(gameOverSprite)
+	removeEntity(tbe)
+}
