@@ -6,9 +6,10 @@ var bgTexture as Texture
 var introFgSprite as TextureSprite
 var introFgTexture as Texture
 var playButtonTexture as Texture
+var howToPlayButtonTexture as Texture
+var howToPlayButtonSprite as TextureSprite
 var height as double
 var width as double
-var tbe as TextButtonEntity
 
 func initialize override
 {
@@ -19,22 +20,26 @@ func initialize override
 	bgSprite = addTextureSpriteForSize(bgTexture, width, height)
 	introFgTexture = createTextureForImageResource("intro_fg")
 	introFgSprite = addTextureSpriteForSize(introFgTexture, 0.5 * width, 0.25 * height)
-	introFgSprite.move(0.5 * width - (introFgSprite.getWidth() / 2), 0.35 * height - (introFgSprite.getHeight() / 2))
+	introFgSprite.move(0.5 * width - (introFgSprite.getWidth() / 2), 0.30 * height - (introFgSprite.getHeight() / 2))
 	playButtonTexture = createTextureForImageResource("playbutton")
 	playButtonSprite = addTextureSpriteForSize(playButtonTexture, 0.2 * width, 0.2 * height)
-	playButtonSprite.move(0.5 * width - (playButtonSprite.getWidth() / 2), 0.7 * height - (playButtonSprite.getHeight() / 2))
-	tbe = TextButtonEntity.forText("Play")
-	tbe.setBackgroundColor(Color.forRGBA(255,255,255,0))
-	addEntity(tbe)
-	tbe.move(0.5 * width - (tbe.getWidth() / 2), 0.9 * height - (tbe.getHeight() / 2))
-	tbe.setClickHandler(func {
-		pushScene(new GameScene())
-	})
+	howToPlayButtonTexture = createTextureForImageResource("howtoplay")
+	howToPlayButtonSprite = addTextureSpriteForSize(howToPlayButtonTexture, 0.2 * width, 0.2 * height)
+	howToPlayButtonSprite.move(0.5 * width - (howToPlayButtonSprite.getWidth() / 2), 0.7 * height - (howToPlayButtonSprite.getHeight() / 2))
+	playButtonSprite.move(0.5 * width - (playButtonSprite.getWidth() / 2), 0.55 * height - (playButtonSprite.getHeight() / 2))
 }
 
 func onPointerEvent(event as PointerEvent) override
 {
 	base.onPointerEvent(event)
+	if (event.action == PointerEvent.DOWN) {
+		if (event.isInside(playButtonSprite.getX(), playButtonSprite.getY(), playButtonSprite.getWidth(), playButtonSprite.getHeight())) {
+			pushScene(new GameScene())
+		}
+		if (event.isInside(howToPlayButtonSprite.getX(), howToPlayButtonSprite.getY(), howToPlayButtonSprite.getWidth(), howToPlayButtonSprite.getHeight())) {
+			PRINT ("CLICKED HOW TO PLAY BUTTON")
+		}
+	}
 }
 
 func cleanup override
@@ -42,5 +47,4 @@ func cleanup override
 	removeSprite(bgSprite)
 	removeSprite(playButtonSprite)
 	removeSprite(introFgSprite)
-	removeEntity(tbe)
 }

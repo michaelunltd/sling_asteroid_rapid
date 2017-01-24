@@ -2,29 +2,85 @@ class is SpriteSceneWithEntities imports cape imports cave imports motion:
 
 var gameOverTexture as Texture
 var gameOverSprite as TextureSprite
+var bgTexture as Texture
+var bgSprite as TextureSprite
 var height as double
 var width as double
-var tbe as TextButtonEntity
+var currentScore as int
+var highScore as int
+var scoreText as TextSprite
+var highScoreText as TextSprite
+var playAgainButtonTexture as Texture
+var playAgainButtonSprite as TextureSprite
+var mainMenuButtonTexture as Texture
+var mainMenuButtonSprite as TextureSprite
+
+ctor(n as int)
+{
+	currentScore = n
+}
 
 func initialize override
 {
 	base.initialize()
 	height = getReferenceHeight()
 	width = getReferenceWidth()
+	bgTexture = createTextureForImageResource("background")
+	bgSprite = addTextureSpriteForSize(bgTexture, width, height)
 	gameOverTexture = createTextureForImageResource("gameover")
 	gameOverSprite = addTextureSpriteForSize(gameOverTexture, 0.3 * width, 0.1 * height)
-	gameOverSprite.move(0.5 * width - (gameOverSprite.getWidth() * 0.5), 0.5 * height - (gameOverSprite.getHeight() * 0.5))
-	tbe = TextButtonEntity.forText("Go Back to Main Menu")
-	tbe.setBackgroundColor(Color.forRGBA(128,128,128,128))
-	addEntity(tbe)
-	tbe.move(0, 0)
-	tbe.setClickHandler(func {
-		pushScene(new MainMenuScene())
-	})
+	gameOverSprite.move(0.5 * width - (gameOverSprite.getWidth() * 0.5), 0.35 * height - (gameOverSprite.getHeight() * 0.5))
+	if (highScore == 0) {
+		highScore = currentScore
+	}
+	else {
+		if (currentScore > highScore) {
+			highScore = currentScore
+		}
+		else {
+			highScore = highScore
+		}
+	}
+	var scoreTextProp = TextProperties.forText("0")
+	scoreTextProp.setTextColor(Color.white())
+	scoreTextProp.setFontSizeRelative(0.01 * height)
+	scoreTextProp.setFontFamily("Times new roman")
+	scoreTextProp.setText(String.append("Your Score: ", currentScore))
+	scoreText = addTextSprite(scoreTextProp)
+	scoreText.move(0.5 * width - (scoreText.getWidth() * 0.5), 0.45 * height - (scoreText.getHeight() * 0.5))
+	var highScoreTextProp = TextProperties.forText("0")
+	highScoreTextProp.setTextColor(Color.white())
+	highScoreTextProp.setFontSizeRelative(0.01 * height)
+	highScoreTextProp.setFontFamily("Times new roman")
+	highScoreTextProp.setText(String.append("High Score: ", highScore))
+	highScoreText = addTextSprite(highScoreTextProp)
+	highScoreText.move(0.5 * width - (highScoreText.getWidth() * 0.5), 0.5 * height - (highScoreText.getHeight() * 0.5))
+	playAgainButtonTexture = createTextureForImageResource("playagainbutton")
+	playAgainButtonSprite = addTextureSpriteForSize(playAgainButtonTexture, 0.1 * width, 0.1 * height)
+	playAgainButtonSprite.move(0.5 * width - (playAgainButtonSprite.getWidth() * 0.5), 0.60 * height - (playAgainButtonSprite.getHeight() * 0.5))
+	mainMenuButtonTexture = createTextureForImageResource("mainmenubutton")
+	mainMenuButtonSprite = addTextureSpriteForSize(mainMenuButtonTexture, 0.1 * width, 0.1 * height)
+	mainMenuButtonSprite.move(0.5 * width - (mainMenuButtonSprite.getWidth() * 0.5), 0.75 * height - (mainMenuButtonSprite.getHeight() * 0.5))
+
+}
+
+func onPointerEvent(event as PointerEvent) override
+{
+	base.onPointerEvent(event)
+	if (event.action == PointerEvent.DOWN) {
+		if (event.isInside(playAgainButtonSprite.getX(), playAgainButtonSprite.getY(), playAgainButtonSprite.getWidth(), playAgainButtonSprite.getHeight())) {
+			pushScene(new GameScene())
+		}
+		if (event.isInside(mainMenuButtonSprite.getX(), mainMenuButtonSprite.getY(), mainMenuButtonSprite.getWidth(), mainMenuButtonSprite.getHeight())) {
+			pushScene(new MainMenuScene())
+		}
+	}
 }
 
 func cleanup override
 {
 	removeSprite(gameOverSprite)
-	removeEntity(tbe)
+	removeSprite(playAgainButtonSprite)
+	removeSprite(mainMenuButtonSprite)
+	// removeEntity(tbe)
 }

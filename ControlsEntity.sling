@@ -1,0 +1,41 @@
+class is SpriteEntity imports cave imports cape imports motion:
+
+var height as double
+var width as double
+var arrowLeftTexture as Texture
+var arrowLeftSprite as TextureSprite
+var arrowRightTexture as Texture
+var arrowRightSprite as TextureSprite
+var controls as TextureSprite
+var gameScene as GameScene
+
+func createSprite override as Sprite
+{
+	gameScene = getScene() as GameScene
+	width = gameScene.getReferenceWidth()
+	height = gameScene.getReferenceHeight()
+	arrowLeftTexture = gameScene.createTextureForImageResource("arrowleft")
+	arrowLeftSprite = gameScene.addTextureSpriteForSize(arrowLeftTexture, 0.3 * height, 0.3 * height)
+	arrowRightTexture = gameScene.createTextureForImageResource("arrowright")
+	arrowRightSprite = gameScene.addTextureSpriteForSize(arrowRightTexture, 0.3 * height, 0.3 * height)
+	arrowLeftSprite.move(0.0, height - arrowLeftSprite.getHeight())
+	arrowLeftSprite.setAlpha(0.5)
+	arrowRightSprite.move(width - arrowRightSprite.getWidth(), height - arrowRightSprite.getWidth())
+	arrowRightSprite.setAlpha(0.5)
+	return(controls)
+}
+
+func cleanup override
+{
+	layer.removeSprite(arrowLeftSprite)
+}
+
+func getArrowLeftButton as TextureSprite
+{
+	return arrowLeftSprite
+}
+
+func getArrowRightButton as TextureSprite
+{
+	return arrowRightSprite
+}

@@ -1,0 +1,55 @@
+class is SpriteEntity imports cave imports cape imports motion:
+
+var gameScene as GameScene
+var fireAsteroidSprite as TextureSprite
+var fireAsteroidTexture as Texture
+var height as double
+var width as double
+var movementX as double
+var movementY as double
+var x as double
+
+func createSprite override as Sprite
+{
+	gameScene = getScene() as GameScene
+	height = gameScene.getReferenceHeight()
+	width = gameScene.getReferenceWidth()
+	var rand = new Random()
+	fireAsteroidTexture = gameScene.createTextureForImageResource("fireasteroid")
+	fireAsteroidSprite = gameScene.addTextureSpriteForSize(fireAsteroidTexture, 0.05 * width, 0.05 * width)
+	x = (0.9) * rand.nextDouble()
+	fireAsteroidSprite.move(x * width - fireAsteroidSprite.getWidth() / 2, height - fireAsteroidSprite.getHeight())
+	return (fireAsteroidSprite)
+}
+
+func isCollide (a as SpriteEntity, b as SpriteEntity) as bool
+{
+	var aCenterX = a.getX() + (a.getWidth() * 0.5)
+	var aCenterY = a.getY() + (a.getHeight() * 0.5)
+	var bCenterX = b.getX() + (b.getWidth() * 0.5)
+	var bCenterY = b.getY() + (b.getHeight() * 0.5)
+	var distanceX = Math.abs(aCenterX - bCenterX)
+	var distanceY = Math.abs(aCenterY - bCenterY)
+	var allowableDistanceX = (a.getWidth() * 0.5) + (b.getWidth() * 0.5) - 0.02
+	var allowableDistanceY = (a.getHeight() * 0.5) + (b.getHeight() * 0.5) - 0.02
+	return distanceX < allowableDistanceX && distanceY < allowableDistanceY
+}
+
+func cleanup override
+{
+	layer.removeSprite(fireAsteroidSprite)
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	movementY = fireAsteroidSprite.getY()
+	movementX = fireAsteroidSprite.getX()
+	if (isCollide(this, gameScene.getPlayerEntity())) {
+		gameScene.gameOver()
+	}
+	var rand = new Random()
+	movementY -= delta * rand.nextDouble()
+	fireAsteroidSprite.move(movementX, movementY)
+	fireAsteroidSprite.setRotation(fireAsteroidSprite.getRotation() + 0.1)
+}

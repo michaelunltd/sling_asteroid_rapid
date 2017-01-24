@@ -13,7 +13,13 @@ var mouseClick = false
 var leftPressed = false
 var rightPressed = false
 var downPressed = false
+var tapLeft = false
+var tapRight = false
 var hasTouchObstacle = false
+var tickCounter = 0
+var speed = 5.0
+var life = 3
+// var timer = new TimeValue()
 
 func createSprite override as Sprite
 {
@@ -30,18 +36,26 @@ func createSprite override as Sprite
 
 func cleanup override
 {
-	gameScene.removeSprite(playerSprite)
+	layer.removeSprite(playerSprite)
 }
 
 func onPointerEvent(event as PointerEvent) as bool
 {
 	pointerX = event.x
 	pointerY = event.y
+	var arrowLeft = gameScene.getControlsEntity().getArrowLeftButton()
+	var arrowRight = gameScene.getControlsEntity().getArrowRightButton()
 	if (event.action == PointerEvent.DOWN) {
-		mouseClick = true
+		if (event.isInside(arrowLeft.getX(), arrowLeft.getY(), arrowLeft.getWidth(), arrowLeft.getHeight())) {
+			tapLeft = true
+		}
+		if (event.isInside(arrowRight.getX(), arrowRight.getY(), arrowRight.getWidth(), arrowRight.getHeight())) {
+			tapRight = true
+		}
 	}
 	if (event.action == PointerEvent.UP) {
-		mouseClick = false
+		tapLeft = false
+		tapRight = false
 	}
 	return false
 }
@@ -77,11 +91,31 @@ func isOutOfScreen as bool
 	return playerSprite.getY() + playerSprite.getHeight() / 2 > height || playerSprite.getY() + playerSprite.getHeight() < 0
 }
 
+func respawn
+{
+	movementX = 0.5 * width - playerSprite.getWidth() / 2
+	movementY = 0
+	life = life - 1
+}
+
 func tick (gameTime as TimeValue, delta as double) override
 {
 	base.tick(gameTime, delta)
+	tickCounter = tickCounter + 1
+	if (tickCounter % 280 == 0) {
+		if (speed > 3.0) {
+			speed -= 0.5
+			PRINT ("incrementing speed")
+		}
+		else {
+			speed = 3.0
+		}
+	}
 	movementX = playerSprite.getX()
 	if (isOutOfScreen()) {
+		respawn()
+	}
+	if (life < 0) {
 		gameScene.gameOver()
 	}
 	if (movementX > width) {
@@ -90,17 +124,20 @@ func tick (gameTime as TimeValue, delta as double) override
 	else if (movementX + playerSprite.getWidth() < 0) {
 		movementX = width
 	}
-	if (leftPressed) {
+	if (leftPressed || tapLeft) {
 		movementX -= 0.01
 	}
-	else if (rightPressed) {
+	else if (rightPressed || tapRight) {
 		movementX += 0.01
 	}
 	else if (downPressed && !hasTouchObstacle) {
 		movementY += 0.01
 	}
-	if (!hasTouchObstacle) {
-		movementY += delta / 5
+	// if (!hasTouchObstacle) {
+	movementY += delta / speed
+	// }
+	if (mouseClick) {
+		movementX -= (playerSprite.getX() - ((pointerX + playerSprite.getWidth() / 2) - 0.0005 * playerSprite.getWidth())) / 15
 	}
 	playerSprite.move(movementX, movementY)
 }
@@ -113,4 +150,14 @@ func setMovementY (n as double)
 func setHasTouchObstacle (n as boolean)
 {
 	hasTouchObstacle = n
+}
+
+func getLife as int
+{
+	return(life)
+}
+
+func setLife(n as int)
+{
+	life = n
 }

@@ -24,7 +24,7 @@ func createSprite override as Sprite
 
 func cleanup override
 {
-	gameScene.removeAllSprites()
+	layer.removeSprite(obstacleSprite)
 }
 
 func hasTouched as bool
@@ -32,7 +32,6 @@ func hasTouched as bool
 	var obstacleY = obstacleSprite.getY()
 	var asteroidEntity = gameScene.getPlayerEntity()
 	var asteroidY = asteroidEntity.getY() + asteroidEntity.getHeight()
-	PRINT ((obstacleSprite.getX() > asteroidEntity.getX()))
 	return ((asteroidY > obstacleY) && (asteroidY < (obstacleSprite.getY() + obstacleSprite.getHeight())) && (obstacleSprite.getX() < asteroidEntity.getX() + asteroidEntity.getWidth() * 0.5) && (obstacleSprite.getX() + obstacleSprite.getWidth()) > (asteroidEntity.getX() + asteroidEntity.getWidth() * 0.5 ))
 }
 
@@ -45,7 +44,6 @@ func tick(gameTime as TimeValue, delta as double) override
 {
 	if (hasTouched()) {
 		var player = gameScene.getPlayerEntity()
-		PRINT (obstacleSprite.getY())
 		player.setMovementY(obstacleSprite.getY() - obstacleSprite.getHeight() - player.getHeight())
 		player.setHasTouchObstacle(true)
 	}
@@ -53,8 +51,7 @@ func tick(gameTime as TimeValue, delta as double) override
 		gameScene.getPlayerEntity().setHasTouchObstacle(false)
 	}
 	if (isOutOfScreen()) {
-		gameScene.removeSpriteFromScene(this)
-		// gameScene.removeAllSprites()
+		gameScene.removeEntityFromScene(this)
 	}
 	base.tick(gameTime, delta)
 	movementY = obstacleSprite.getY()

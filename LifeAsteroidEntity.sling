@@ -1,0 +1,61 @@
+class is SpriteEntity imports cave imports cape imports motion:
+
+var gameScene as GameScene
+var lifeAsteroidSprite as TextureSprite
+var lifeAsteroidTexture as Texture
+var height as double
+var width as double
+var movementX as double
+var movementY as double
+var x as double
+
+func createSprite override as Sprite
+{
+	gameScene = getScene() as GameScene
+	height = gameScene.getReferenceHeight()
+	width = gameScene.getReferenceWidth()
+	var rand = new Random()
+	lifeAsteroidTexture = gameScene.createTextureForImageResource("lifeasteroid")
+	lifeAsteroidSprite = gameScene.addTextureSpriteForSize(lifeAsteroidTexture, 0.05 * width, 0.05 * width)
+	x = (0.9) * rand.nextDouble()
+	lifeAsteroidSprite.move(x * width - lifeAsteroidSprite.getWidth() / 2, height - lifeAsteroidSprite.getHeight())
+	return (lifeAsteroidSprite)
+}
+
+func isCollide (a as SpriteEntity, b as SpriteEntity) as bool
+{
+	var aCenterX = a.getX() + (a.getWidth() * 0.5)
+	var aCenterY = a.getY() + (a.getHeight() * 0.5)
+	var bCenterX = b.getX() + (b.getWidth() * 0.5)
+	var bCenterY = b.getY() + (b.getHeight() * 0.5)
+	var distanceX = Math.abs(aCenterX - bCenterX)
+	var distanceY = Math.abs(aCenterY - bCenterY)
+	var allowableDistanceX = (a.getWidth() * 0.5) + (b.getWidth() * 0.5) - 0.02
+	var allowableDistanceY = (a.getHeight() * 0.5) + (b.getHeight() * 0.5) - 0.02
+	return distanceX < allowableDistanceX && distanceY < allowableDistanceY
+}
+
+func cleanup override
+{
+	layer.removeSprite(lifeAsteroidSprite)
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	movementY = lifeAsteroidSprite.getY()
+	movementX = lifeAsteroidSprite.getX()
+	if (isCollide(this, gameScene.getPlayerEntity())) {
+		gameScene.removeEntityFromScene(this)
+		var player = gameScene.getPlayerEntity()
+		if (player.getLife() < 5) {
+			player.setLife(player.getLife() + 1)
+		}
+		else if (player.getLife() == 5) {
+			player.setLife(5)
+		}
+	}
+	var rand = new Random()
+	movementY -= delta * rand.nextDouble()
+	lifeAsteroidSprite.move(movementX, movementY)
+}

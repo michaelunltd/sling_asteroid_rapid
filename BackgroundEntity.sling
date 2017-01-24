@@ -24,9 +24,3 @@ func tick(gameTime as TimeValue, delta as double) override
 	sprite.move(0.0, y)
 	bgSprite.move(0.0, y + height)
 }
-
-func cleanup override
-{
-	layer.removeSprite(sprite)
-	layer.removeSprite(bgSprite)
-}

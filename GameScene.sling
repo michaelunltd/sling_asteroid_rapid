@@ -6,8 +6,15 @@ var tbe as TextButtonEntity
 var bgEntity as SpriteEntity
 var obstacleEntity as ObstacleEntity
 var asteroidEntity as AsteroidEntity
+var controlsEntity as ControlsEntity
 var milliseconds = 0
 var collidableEntities as vector<SpriteEntity>
+var lifeTextProp = TextProperties.forText("0")
+var lifeText as TextSprite
+var scoreTextProp = TextProperties.forText("0")
+var scoreText as TextSprite
+var timer = new TimeValue()
+var score = 0
 
 func initialize override
 {
@@ -16,8 +23,10 @@ func initialize override
 	addEntity(bgEntity)
 	height = getReferenceHeight()
 	width = getReferenceWidth()
-	tbe = TextButtonEntity.forText("Quit")
-	tbe.setBackgroundColor(Color.forRGBA(128,128,128,128))
+	var tbe = TextButtonEntity.forTextProperties(TextProperties.forText("Quit").setFontSizeRelative(0.01 * height))
+	tbe.resize(0.1 * width, 0.02 * height)
+	tbe.setBackgroundColor(Color.forRGB(128, 255, 128))
+	tbe.setPressedColor(Color.forRGB(80, 150, 80))
 	addEntity(tbe)
 	tbe.move(0, 0)
 	tbe.setClickHandler(func {
@@ -27,14 +36,31 @@ func initialize override
 	addEntity(asteroidEntity)
 	obstacleEntity = new ObstacleEntity()
 	addEntity(obstacleEntity)
+	var lifeAsteroidEntity = new LifeAsteroidEntity()
+	addEntity(lifeAsteroidEntity)
 	collidableEntities = new vector<SpriteEntity>
 	collidableEntities += asteroidEntity
 	collidableEntities += obstacleEntity
+	lifeTextProp.setTextColor(Color.white())
+	lifeTextProp.setFontSizeRelative(0.01 * height)
+	lifeTextProp.setFontFamily("Times new roman")
+	lifeTextProp.setText(String.append("Life: ", asteroidEntity.getLife()))
+	lifeText = addTextSprite(lifeTextProp)
+	lifeText.move(width - lifeText.getWidth(), 0.0)
+	scoreTextProp.setTextColor(Color.white())
+	scoreTextProp.setFontSizeRelative(0.01 * height)
+	scoreTextProp.setFontFamily("Times new roman")
+	scoreTextProp.setText(String.append("Score: ", score))
+	scoreText = addTextSprite(scoreTextProp)
+	scoreText.move(0.5 * width - scoreText.getWidth() * 0.5, 0.0)
+	controlsEntity = new ControlsEntity()
+	addEntity(controlsEntity)
 }
 
 func onPointerEvent(event as PointerEvent) override
 {
 	base.onPointerEvent(event)
+
 }
 
 func cleanup override
@@ -43,18 +69,44 @@ func cleanup override
 	removeEntity(tbe)
 	removeEntity(obstacleEntity)
 	removeEntity(asteroidEntity)
-	removeEntity(obstacleEntity)
+	removeEntity(bgEntity)
+	removeEntity(controlsEntity)
 	Vector.clear(collidableEntities)
 }
 
 func tick(gameTime as TimeValue, delta as double) override
 {
 	base.tick(gameTime, delta)
+	lifeTextProp.setText(String.append("Life: ", asteroidEntity.getLife()))
+	lifeText.setText(lifeTextProp)
+	if (timer.getMicroSeconds() == 0) {
+		timer.setMicroSeconds(gameTime.getMicroSeconds())
+	}
+	else {
+		score = (gameTime.getMicroSeconds() - timer.getMicroSeconds()) / 1000000
+		scoreTextProp.setText(String.append("Score: ", String.forInteger(score)))
+		scoreText.setText(scoreTextProp)
+	}
+	var rand = new Random()
 	milliseconds = milliseconds + 1
 	if (milliseconds % 60 == 0) {
 		var obs = new ObstacleEntity()
 		addEntity(obs)
 		collidableEntities += obs
+	}
+	if (milliseconds % 280 == 0) {
+		var num = rand.nextInt(2)
+		PRINT (num)
+		if (num == 1) {
+			var fireAsteroid = new FireAsteroidEntity()
+			addEntity(fireAsteroid)
+			collidableEntities += fireAsteroid
+		}
+		else if (num == 2) {
+			var lifeAsteroid = new LifeAsteroidEntity()
+			addEntity(lifeAsteroid)
+			collidableEntities += lifeAsteroid
+		}
 	}
 }
 
@@ -68,10 +120,9 @@ func getPlayerEntity as AsteroidEntity
 	return(asteroidEntity)
 }
 
-func removeObstacleEntity(n as SpriteEntity)
+func removeEntityFromScene(n as SpriteEntity)
 {
 	removeEntity(n)
-	Vector.removeValue(collidableEntities, n)
 }
 
 func removeSpriteFromScene(n as SpriteEntity)
@@ -81,5 +132,10 @@ func removeSpriteFromScene(n as SpriteEntity)
 
 func gameOver
 {
-	pushScene(new GameOverScene())
+	pushScene(new GameOverScene(score))
+}
+
+func getControlsEntity as ControlsEntity
+{
+	return(controlsEntity)
 }
