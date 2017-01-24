@@ -1,5 +1,7 @@
 class is SpriteSceneWithEntities imports cape imports cave imports motion:
 
+depend "androidPermission:android.permission.WRITE_EXTERNEL_STORAGE"
+depend "androidPermission:android.permission.READ_EXTERNAL_STORAGE"
 var gameOverTexture as Texture
 var gameOverSprite as TextureSprite
 var bgTexture as Texture
@@ -25,6 +27,22 @@ func initialize override
 	base.initialize()
 	height = getReferenceHeight()
 	width = getReferenceWidth()
+	var output =  FileInstance.forPath("/sdcard/data/mygame.txt")
+	if (output != null) {
+		highScore = Integer.asInteger(output.getContentsString("UTF-8"))
+		if (!highScore) {
+			highScore = currentScore
+			output.setContentsString(String.asString(highScore), "UTF-8")
+		}
+		else {
+			if (currentScore > highScore) {
+				highScore = currentScore
+			}
+			else if (currentScore <= highScore) {
+				highScore = highScore
+			}
+		}
+	}
 	bgTexture = createTextureForImageResource("background")
 	bgSprite = addTextureSpriteForSize(bgTexture, width, height)
 	gameOverTexture = createTextureForImageResource("gameover")
@@ -37,7 +55,7 @@ func initialize override
 		if (currentScore > highScore) {
 			highScore = currentScore
 		}
-		else {
+		else if (currentScore <= highScore) {
 			highScore = highScore
 		}
 	}
@@ -82,5 +100,4 @@ func cleanup override
 	removeSprite(gameOverSprite)
 	removeSprite(playAgainButtonSprite)
 	removeSprite(mainMenuButtonSprite)
-	// removeEntity(tbe)
 }
